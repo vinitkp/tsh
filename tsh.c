@@ -1,7 +1,7 @@
 /* 
  * tsh - A tiny shell program with job control
  * 
- *WRITER: Vinit Pandey
+ *@Author Vinit Pandey
   ID: 201101090
  */
 #include <stdio.h>
