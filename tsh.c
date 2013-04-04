@@ -326,7 +326,7 @@ void do_bgfg(char **argv)
 {
 	if(argv[1]==NULL)
 		{
-			printf("%s command requires PID or jobid argument\n", argv[0]); //TODO jobid to be written as %jobid
+			printf("%s command requires PID or %%jobid argument\n", argv[0]); //TODO jobid to be written as %jobid
 			return;
 
 		}
@@ -337,9 +337,15 @@ void do_bgfg(char **argv)
 	
 	if(tmp_id[0]=='%')
 	{
-		jid=atoi(&tmp_id[1]);
 
 		int i;
+		if(!isdigit(tmp_id[1]))
+		{
+			printf("%s: argument must be a PID or %%jobid\n",argv[0]);
+			return;
+		}
+		jid=atoi(&tmp_id[1]);
+//		printf("jid is %d",jid);
 		// if argumaent is jid
 		for(i=0;i<MAXJOBS;i++)
 		{
@@ -352,7 +358,7 @@ void do_bgfg(char **argv)
 		}
 		if(job_id==-1)
 			{
-				printf(" the job id doesnot exist\n");
+				printf("%s: No such job\n",argv[1]);
 				return;
 			}
 		// if argumaent is pid
@@ -360,8 +366,12 @@ void do_bgfg(char **argv)
 	}
 	else
 	{
+		if(!isdigit(*tmp_id))
+		{
+			printf("%s: argument must be a PID or %%jobid\n",argv[0]);
+			return;
+		}
 		pid=atoi(tmp_id);
-
 		int i;
 		for(i=0;i<MAXJOBS;i++)
 		{
@@ -374,7 +384,7 @@ void do_bgfg(char **argv)
 		}
 		if(job_id==-1)
 			{
-				printf(" the pid doesnot exist\n");
+				printf("(%s): No such process\n",argv[1]);
 				return;
 			}
 	}
@@ -384,19 +394,18 @@ void do_bgfg(char **argv)
 	{
 		if(jobs[job_id].state==BG)   // run the background process as tthe forgeround process
 		{
-			int status;
+			//int status;
 			jobs[job_id].state=FG;
-			waitfg(pid);
 			
-			kill(pid,SIGKILL);
-			deletejob(jobs,pid);
+			kill(pid,SIGCONT);
+			waitfg(pid);
 			
 		}
 
 		else if(jobs[job_id].state==ST)  // run the stoped signal as foregrond process
 		{
 			kill(pid,SIGCONT);
-			int status;
+			//int status;
 			jobs[job_id].state=FG;
 			waitfg(pid);
 			
@@ -456,12 +465,7 @@ void sigchld_handler(int sig)
 			deletejob(jobs, pid);  
 		}  
 	}  
-
-	if (errno != ECHILD) {  
-		unix_error("waitpid error");   
-	}  
-
-	return; 
+ 
     return;
 }
 
@@ -496,7 +500,7 @@ void sigint_handler(int sig)
 void sigtstp_handler(int sig) 
 {
 	int i;
-	printf("pid is %d \n", getpid());
+//	printf("pid is %d \n", getpid());
 	for(i=0;i<MAXJOBS;i++)
 	{
 		if(jobs[i].state==FG)
