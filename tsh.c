@@ -179,7 +179,7 @@ void eval(char *cmdline)
 	if ( argv[0] == NULL )
 		 return;
 		  /* Ignore empty lines */
-	if ( !builtin_cmd( argv ) ) {
+	if ( !builtin_cmd( argv ) ) {    // checks whether the command is inbuilt or any basic command or is any command
 		if (( pid = fork()) == 0) {
 			/* Child runs user job */
 			setpgid(0,0); // setting the froup id of the new process to be a new group id numbered the same as the pid
@@ -324,22 +324,22 @@ int builtin_cmd(char **argv)
  */
 void do_bgfg(char **argv) 
 {
-	if(argv[1]==NULL)
+	if(argv[1]==NULL)    // no argument passed
 		{
 			printf("%s command requires PID or %%jobid argument\n", argv[0]); //TODO jobid to be written as %jobid
 			return;
 
 		}
-	char* tmp_id=argv[1];
-	int jid;
-	int job_id=-1;
+	char* tmp_id=argv[1]; // stores the id typed by user
+	int jid;          
+	int job_id=-1;           // jid of the process.. used in the array of jobs
 	pid_t pid;
 	
 	if(tmp_id[0]=='%')
 	{
 
 		int i;
-		if(!isdigit(tmp_id[1]))
+		if(!isdigit(tmp_id[1])) // argument is not a digit
 		{
 			printf("%s: argument must be a PID or %%jobid\n",argv[0]);
 			return;
@@ -356,7 +356,7 @@ void do_bgfg(char **argv)
 				break;
 			}
 		}
-		if(job_id==-1)
+		if(job_id==-1)      // theres no job in the jobs structure as given by user
 			{
 				printf("%s: No such job\n",argv[1]);
 				return;
